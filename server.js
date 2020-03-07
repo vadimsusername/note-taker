@@ -19,6 +19,11 @@ var dbDir = path.resolve(__dirname,"db");
 //console.log(dbDir);
 var dbPath = path.join(dbDir,"db.json");
 var dbJSON = fs.readFileSync(dbPath,"utf8");
+//if(dbJSON)
+console.log(dbJSON);
+//if(!dbJSON){
+//    dbJSON = [{title:"test title",}]
+//}
 var dbObj = JSON.parse(dbJSON);
 console.log(dbJSON);
 var obj = [
@@ -46,12 +51,12 @@ app.get("/api/notes",function(req,res){
     res.json(dbObj);
   });
 app.post("/api/notes",function(req,res){
-    
+    dbJSON = fs.readFileSync(dbPath,"utf8");
     var currentNotes = JSON.parse(dbJSON);
     console.log(currentNotes);
     var newNote = req.body;
     console.log(newNote);
-    newNote.id = currentNotes.length;
+    newNote.id = currentNotes.length + 1;
     currentNotes.push(newNote);
     fs.writeFile(dbPath,JSON.stringify(currentNotes), (err) => {
         if (err) console.log(err);
@@ -61,6 +66,23 @@ app.post("/api/notes",function(req,res){
 
   
   
+ });
+ app.delete("/api/notes/:id",function(req,res){
+    var noteId = req.params.id;
+    console.log(parseInt(noteId));
+    console.log(typeof noteId);
+    dbJSON = fs.readFileSync(dbPath,"utf8");
+    var currentNotes = JSON.parse(dbJSON);
+    currentNotes.splice(parseInt(noteId) - 1 ,1);
+    //Update the id's
+    for(var i = 0;i < currentNotes.length;i++){
+        currentNotes[i].id = i + 1;
+    }
+    fs.writeFile(dbPath,JSON.stringify(currentNotes), (err) => {
+        if (err) console.log(err);
+        console.log('The file has been saved!');
+      });
+    res.json(currentNotes);
  });
 app.listen(PORT, function() {
     console.log("App listening on PORT " + PORT);
